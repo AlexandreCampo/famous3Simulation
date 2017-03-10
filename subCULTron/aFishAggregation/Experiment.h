@@ -50,11 +50,11 @@ public:
     std::vector<aMussel*> aMussels;
 	
     // parameters
-    int aFishCount = 2;
+    int aFishCount = 100;
     int aPadCount = 0;
     int aMusselCount = 0;
     float maxTime = 3600;
-    float aquariumRadius = 1.0;    
+    float aquariumRadius = 5.0;    
    
     // methods
     Experiment (Simulator* s, bool graphics);

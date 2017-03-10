@@ -17,53 +17,23 @@
 /*    along with FaMouS.  If not, see <http://www.gnu.org/licenses/>.         */
 /*----------------------------------------------------------------------------*/
 
-#ifndef EXPERIMENT_H
-#define EXPERIMENT_H
-
 #include "Simulator.h"
-#include "Service.h"
-#include "Gsl.h"
+#include "Experiment.h"
 
-#include <vector>
-#include <fstream>
+#include <iostream>
 
-
-class PhysicsBullet;
-class WaterVolume;
-class RenderOSG;
-class aPad;
-class aFish;
-class aMussel;
-
-class Experiment : public Service
-{
-public:
-
-    // services
-    PhysicsBullet* physics;
-    WaterVolume* waterVolume;
-    RenderOSG* render;
-
-    // objects
-    std::vector<aFish*> aFishes;
-    std::vector<aPad*> aPads;
-    std::vector<aMussel*> aMussels;
 	
-    // parameters
-    int aFishCount = 2;
-    int aPadCount = 0;
-    int aMusselCount = 0;
-    float maxTime = 3600;
-    float aquariumRadius = 1.0;    
-   
-    // methods
-    Experiment (Simulator* s, bool graphics);
-    ~Experiment ();
+int main(int argc,char** argv)
+{
+    // setup and run simulated experiment
+    Simulator* simulator = new Simulator ();
 
-    void Reset ();
-    void Step ();
-    void Run();
-};
+    bool graphics = true;
+    Experiment* exp = new Experiment (simulator, graphics);
+    exp->Run();    
 
+    delete simulator;
 
-#endif
+    return 0;
+}
+

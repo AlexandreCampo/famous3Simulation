@@ -106,8 +106,10 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
 	}
 	r->AddDevices();
 //	r->optical->SetDrawable(true);
-//	r->optical->SetReceiveOmnidirectional(false);
-	r->setDragCoefficients(btVector3( 0.05, 0.3, 0.1), btVector3( 0.05, 0.05, 0.1));
+	r->optical->SetReceiveOmnidirectional(true);
+	r->SetProximitySensorsRange(0.7);
+//	r->setDragCoefficients(btVector3( 0.1, 0.4, 0.2), btVector3( 0.05, 0.1, 0.3));
+	r->setDragCoefficients(btVector3( 0.1, 0.25, 0.1), btVector3( 0.05, 0.05, 0.2));
 
 	ControllerAFish* c = new ControllerAFish (r);
 	c->SetTimeStep(0.1);
@@ -117,11 +119,10 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
 	// position is set in reset
     }
 
-    // create one debug afish
-    ControllerAFish* c = (ControllerAFish*) aFishes[0]->controller;
-    aFishes[0]->optical->SetDrawable(true);
-    c->dbg=1;
-
+    // ControllerAFish* c = (ControllerAFish*) aFishes[0]->controller;
+    // aFishes[0]->optical->SetDrawable(true);
+    // c->dbg=1;
+    
     AquariumCircular* aquarium = new AquariumCircular(aquariumRadius,  3.0, 1.0, 40.0);
     aquarium->Register(physics);
     aquarium->Register(waterVolume);

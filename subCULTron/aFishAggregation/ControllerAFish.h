@@ -17,52 +17,65 @@
 /*    along with FaMouS.  If not, see <http://www.gnu.org/licenses/>.         */
 /*----------------------------------------------------------------------------*/
 
-#ifndef EXPERIMENT_H
-#define EXPERIMENT_H
+#ifndef CONTROLLER_A_FISH_H
+#define CONTROLLER_A_FISH_H
 
-#include "Simulator.h"
-#include "Service.h"
-#include "Gsl.h"
+#include "Controller.h"
+#include "aFish.h"
 
-#include <vector>
-#include <fstream>
-
-
-class PhysicsBullet;
-class WaterVolume;
-class RenderOSG;
-class aPad;
-class aFish;
-class aMussel;
-
-class Experiment : public Service
+class ControllerAFish : public Controller
 {
-public:
+public : 
+    aFish* fish;
 
-    // services
-    PhysicsBullet* physics;
-    WaterVolume* waterVolume;
-    RenderOSG* render;
-
-    // objects
-    std::vector<aFish*> aFishes;
-    std::vector<aPad*> aPads;
-    std::vector<aMussel*> aMussels;
-	
+    //int dbg = 0;
+    
     // parameters
-    int aFishCount = 2;
-    int aPadCount = 0;
-    int aMusselCount = 0;
-    float maxTime = 3600;
-    float aquariumRadius = 1.0;    
-   
-    // methods
-    Experiment (Simulator* s, bool graphics);
-    ~Experiment ();
+    float obstacleAvoidanceThreshold = 0.1;
+//    float maxProximitySensing = 0.12;
+    float obstacleAvoidanceSpeed = 0.5; // 1
+    float exploreMeanDuration = 5.0;
+    float exploreSpeed = 0.01; // 0.05
+    float restDuration = 30.00;
+    float brakeDuration = 0.5;
+    float turnSpeed = 0.3;
+    float brakeSpeed = 0.05;
+    float attractionSpeed = 0.01;
 
-    void Reset ();
+    // state handling
+    int state;
+
+    // time
+    float time;
+    float timestep;
+
+    // state working variables
+    float stateDuration;
+    float stateStartTime;
+    
+    int turnPreviousState;
+    float turnSign;
+
+    int messagesReceived;
+    float msgx;
+    float msgy;
+    
+    // methods
+    ControllerAFish (aFish* fish);
+    ~ControllerAFish ();
+
     void Step ();
-    void Run();
+
+    void StateExploreInit ();
+    void StateExplore ();
+    void StateBrakeInit ();
+    void StateBrake ();
+    void StateRestInit ();
+    void StateRest ();
+    void StateTurnInit (int previousState, float angle);
+    void StateTurn ();
+    void Reset ();
+    bool ObstacleAvoidance ();
 };
 
 

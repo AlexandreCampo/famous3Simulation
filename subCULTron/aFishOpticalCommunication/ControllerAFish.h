@@ -27,6 +27,8 @@ class ControllerAFish : public Controller
 {
 public : 
     aFish* fish;
+
+    int dbg = 0;
     
     // parameters
     float obstacleAvoidanceThreshold = 0.05;

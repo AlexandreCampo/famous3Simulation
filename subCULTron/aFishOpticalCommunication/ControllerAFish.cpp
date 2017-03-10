@@ -51,11 +51,10 @@ void ControllerAFish::Step ()
     cout << this << " sent " << 1 << endl;
     
     // receive messages
-    int msg;
-    int receiver;
-    while (fish->optical->Receive(msg, receiver))
+    DeviceOpticalTransceiver::Message msg;
+    while (fish->optical->Receive(msg))
     {
-	cout << this << " fish received msg " << msg << endl;
+	cout << this << " fish received msg " << msg.content << endl;
     }
 
     

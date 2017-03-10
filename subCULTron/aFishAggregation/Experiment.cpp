@@ -101,7 +101,7 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
 	r->Register(waterVolume);
 	if (render) 
 	{	    
-	    r->SetMeshFilename ("3dmodels/aFish.3ds.(0.02,0.02,0.02).scale");
+	    r->SetMeshFilename ("3dmodels/aFish.3ds.(0.015,0.015,0.015).scale");
 	    r->Register(render); 
 	}
 	r->AddDevices();

@@ -84,7 +84,7 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
 	render->viewer->getCamera()->setProjectionMatrixAsPerspective(45.0, 1.0, 0.1, 1000); 
 
 	osgGA::SphericalManipulator* manip = dynamic_cast<osgGA::SphericalManipulator*>(render->viewer->getCameraManipulator());
-	manip->setDistance(7);
+	manip->setDistance(15);
 	manip->setCenter(osg::Vec3(0,0,1.0));
 	manip->setElevation(90.0 * M_PI / 180.0);
 	manip->setHeading(0.0 * M_PI / 180.0);
@@ -101,7 +101,7 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
 	r->Register(waterVolume);
 	if (render) 
 	{	    
-	    r->SetMeshFilename ("3dmodels/aFish.3ds.(0.01,0.01,0.01).scale");
+	    r->SetMeshFilename ("3dmodels/aFish.3ds.(0.02,0.02,0.02).scale");
 	    r->Register(render); 
 	}
 	r->AddDevices();
@@ -118,10 +118,6 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
 	
 	// position is set in reset
     }
-
-    // ControllerAFish* c = (ControllerAFish*) aFishes[0]->controller;
-    // aFishes[0]->optical->SetDrawable(true);
-    // c->dbg=1;
     
     AquariumCircular* aquarium = new AquariumCircular(aquariumRadius,  3.0, 1.0, 40.0);
     aquarium->Register(physics);

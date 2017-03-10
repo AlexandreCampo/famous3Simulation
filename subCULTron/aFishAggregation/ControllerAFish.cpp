@@ -55,25 +55,27 @@ void ControllerAFish::Step ()
     messagesReceived = 0;
     msgx = 0;
     msgy = 0;
+    int n = 0;
     DeviceOpticalTransceiver::Message msg;    
     while (fish->optical->Receive(msg))
     {
 	messagesReceived++;
 	msgx += msg.direction.x();
 	msgy += msg.direction.y();
+	if (msg.distance < 0.4) n++;
     }
+
+    // by default skip attraction
+    attraction = false;
+    
     if (messagesReceived > 0)
     {
 	msgx /= messagesReceived;
 	msgy /= messagesReceived;
+	
+	// less than 2 neighbours in close range
+	if (n <= 2) attraction = true;
     }
-
-    
-    // if (dbg == 0) StateRestInit();
-    // else
-    // {
-    // 	cout << "dbg fish got " << messagesReceived << " messages" <<endl;
-    // }
     
     switch (state)
     {
@@ -211,12 +213,36 @@ void ControllerAFish::StateRest ()
 	stateStartTime = time;
     }
 
-    // slowly drive towards neighbours
-    float ls = attractionSpeed * (msgx - msgy);
-    float rs = attractionSpeed * (msgx + msgy);
-    // cout << this << " rest " << msgx << " " << msgy << " ls/lr = " << ls << " " << rs << endl;
-    // fish->propellerLeft->SetSpeed(ls);
-    // fish->propellerRight->SetSpeed(rs);
+    // if attraction, slowly drive towards neighbours
+    float ls = 0.0;
+    float rs = 0.0;
+    if (attraction)
+    {
+	float angle = atan2(msgy, msgx);
+	if (fabs(angle) < 30.0 * M_PI / 180.0)
+	{
+	    ls = attractionSpeed * 0.1;
+	    rs = attractionSpeed * 0.1;
+	}
+	else if (fabs(angle) > 150.0 * M_PI / 180.0)
+	{
+	    ls = -attractionSpeed * 0.1;
+	    rs = -attractionSpeed * 0.1;
+	}
+	else if (angle < 0)
+	{
+	    ls = -attractionSpeed;
+	    rs = attractionSpeed;
+	}
+	else
+	{
+	    ls = attractionSpeed;
+	    rs = -attractionSpeed;
+	}
+    }
+
+    fish->propellerLeft->SetSpeed(ls);
+    fish->propellerRight->SetSpeed(rs);
     
 }
 
@@ -239,12 +265,6 @@ bool ControllerAFish::ObstacleAvoidance()
 	|| fish->rayRight->hasHit()
 	)
 	obstaclePerceived = 1;	    
-
-    // // if obstacles on both sides and nothing ahead, skip avoidance
-    // if (!fish->rayFrontLU->hasHit() && !fish->rayFrontRU->hasHit()
-    // 	&& fish->rayLeft->hasHit() && fish->rayRight->hasHit()
-    // 	)
-    // 	obstaclePerceived = 0;	    
     
     // no obstacles to avoid, return immediately
     if (obstaclePerceived == 0)
@@ -256,16 +276,6 @@ bool ControllerAFish::ObstacleAvoidance()
     // proportional brake
     if (pr > obstacleAvoidanceThreshold && pl > obstacleAvoidanceThreshold)
     {
-	// todo debug	
-	// cout << this << "OA B " << pl << " " << pr << " | "
-	//      << fish->rayFrontLU->GetValue() << " " 
-	//      << fish->rayFrontLD->GetValue() << " " 
-	//      << fish->rayLeft->GetValue() << " : " 
-	//      << fish->rayFrontRU->GetValue() << " " 
-	//      << fish->rayFrontRD->GetValue() << " " 
-	//      << fish->rayRight->GetValue() << " . " << endl; 
-	    
-	
 	// break symmetry
 	leftSpeed = -brakeSpeed * pr / (pr + pl);
 	rightSpeed = -brakeSpeed * pl / (pr + pl);	
@@ -308,8 +318,6 @@ void ControllerAFish::Reset ()
     // start in explore state
     state = EXPLORE;
     StateExploreInit();
-
-//    if (dbg == 0) StateRestInit();
 }
 
 

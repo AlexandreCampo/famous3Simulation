@@ -28,8 +28,6 @@ class ControllerAFish : public Controller
 public : 
     aFish* fish;
 
-    //int dbg = 0;
-    
     // parameters
     float obstacleAvoidanceThreshold = 0.1;
 //    float maxProximitySensing = 0.12;
@@ -40,7 +38,7 @@ public :
     float brakeDuration = 0.5;
     float turnSpeed = 0.3;
     float brakeSpeed = 0.05;
-    float attractionSpeed = 0.01;
+    float attractionSpeed = 0.2;
 
     // state handling
     int state;
@@ -59,6 +57,7 @@ public :
     int messagesReceived;
     float msgx;
     float msgy;
+    bool attraction = false;
     
     // methods
     ControllerAFish (aFish* fish);

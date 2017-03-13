@@ -105,7 +105,7 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
 	r->Register(waterVolume);
 	if (render) 
 	{
-	    r->SetMeshFilename ("3dmodels/aMussel_open.obj.(0.01,0.01,0.01).scale");
+	    r->SetMeshFilename ("../3dmodels/aMussel_open.obj.(0.01,0.01,0.01).scale");
 	    r->Register(render); 
 	}
 	r->AddDevices();

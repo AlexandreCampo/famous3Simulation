@@ -17,7 +17,7 @@ solution "experiment"
       
       links { "famous", "BulletDynamics", "BulletCollision", "LinearMath", 
               "gsl", "gslcblas", "glut", "GL", "GLU", "boost_program_options", 
-              "tinyxml", "osg", "osgGA", "osgDB", "osgViewer"}
+              "tinyxml", "osg", "osgGA", "osgDB", "osgViewer", "osgText"}
 
 
    --- ============================= MACOSX =================================

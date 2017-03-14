@@ -70,7 +70,7 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
 
     // add services
     simulator->SetTimeStep (0.05);
-    physics = new PhysicsBullet(1);
+    physics = new PhysicsBullet();
     physics->SetTimeStep(0.05);
     simulator->Add (physics);
     float waterDensity = 1000.0;

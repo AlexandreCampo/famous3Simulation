@@ -17,57 +17,46 @@
 /*    along with FaMouS.  If not, see <http://www.gnu.org/licenses/>.         */
 /*----------------------------------------------------------------------------*/
 
-#ifndef CONTROLLER_A_FISH_H
-#define CONTROLLER_A_FISH_H
+#ifndef EXPERIMENT_H
+#define EXPERIMENT_H
 
-#include "Controller.h"
-#include "aFish.h"
+#include "Simulator.h"
+#include "Service.h"
+#include "Gsl.h"
 
-class ControllerAFish : public Controller
+#include <vector>
+#include <fstream>
+
+
+class PhysicsBullet;
+class WaterVolume;
+class RenderOSG;
+class aFish;
+
+class Experiment : public Service
 {
-public : 
-    aFish* fish;
+public:
 
-    int dbg = 0;
-    
+    // services
+    PhysicsBullet* physics;
+    WaterVolume* waterVolume;
+    RenderOSG* render;
+
+    // objects
+    std::vector<aFish*> aFishes;
+	
     // parameters
-    float obstacleAvoidanceThreshold = 0.05;
-//    float maxProximitySensing = 0.12;
-    float obstacleAvoidanceSpeed = 0.99;
-    float exploreMeanDuration = 5.0;
-    float exploreSpeed = 0.05;
-    float turnSpeed = 0.3;
-    float breakSpeed = 1;
-
-    // state handling
-    int state;
-
-    // time
-    float time;
-
-    // state working variables
-    float exploreDuration;
-    float exploreStartTime;
-
-    int turnPreviousState;
-    float turnDuration;
-    float turnStartTime;
-    float turnSign;
-    
-    float collisionsDecisionLastTime;
-    
+    int aFishCount = 100;
+    float maxTime = 3600;
+    float aquariumRadius = 3.0;    
+   
     // methods
-    ControllerAFish (aFish* fish);
-    ~ControllerAFish ();
+    Experiment (Simulator* s, bool graphics);
+    ~Experiment ();
 
-    void Step ();
-
-    void StateExploreInit ();
-    void StateExplore ();
-    void StateTurnInit (int previousState, float angle);
-    void StateTurn ();
     void Reset ();
-    bool ObstacleAvoidance ();
+    void Step ();
+    void Run();
 };
 
 

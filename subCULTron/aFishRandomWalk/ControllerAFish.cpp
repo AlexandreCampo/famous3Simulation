@@ -44,7 +44,6 @@ ControllerAFish::ControllerAFish (aFish* fish)
 void ControllerAFish::Step ()
 {
     time = object->simulator->time;
-    timestep = object->simulator->timestep;
     
     switch (state)
     {
@@ -183,7 +182,6 @@ void ControllerAFish::Reset ()
 {
     // reset time
     time = 0.0;
-    timestep = 0.0;
 
     // state working variables
     exploreDuration = 0.0;

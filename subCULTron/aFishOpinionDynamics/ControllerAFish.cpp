@@ -44,7 +44,7 @@ void ControllerAFish::DiffuseAndUpdateOpinion()
 {    
     // with some proba, send a blink
     float rnd = gsl_ran_flat(rng, 0.0, 1.0);
-    if (rnd < blinkProba * timestep)
+    if (rnd < blinkProba * GetTimeStep())
     {
 	int m = (opinion << 8) + int (confidence * 255);
 	
@@ -84,7 +84,6 @@ void ControllerAFish::DiffuseAndUpdateOpinion()
 void ControllerAFish::Step ()
 {
     time = object->simulator->time;
-    timestep = object->simulator->timestep;
 
     DiffuseAndUpdateOpinion();
     
@@ -219,7 +218,6 @@ void ControllerAFish::Reset ()
 {
     // reset time
     time = 0.0;
-    timestep = 0.0;
 
     // state working variables
     exploreDuration = 0.0;

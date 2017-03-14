@@ -17,58 +17,74 @@
 /*    along with FaMouS.  If not, see <http://www.gnu.org/licenses/>.         */
 /*----------------------------------------------------------------------------*/
 
-#ifndef CONTROLLER_A_FISH_H
-#define CONTROLLER_A_FISH_H
+#include "ControllerAFish.h"
 
-#include "Controller.h"
-#include "aFish.h"
+#include "Simulator.h"
 
-class ControllerAFish : public Controller
+#include <cmath>
+#include <iostream>
+
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
+extern gsl_rng* rng;
+extern long int rngSeed;
+
+
+ControllerAFish::ControllerAFish (aFish* fish)
+    : Controller (fish)
 {
-public : 
-    aFish* fish;
+    this->fish = fish;
 
-    int dbg = 0;
+    Reset();
+}
+
+void ControllerAFish::Step ()
+{
+    float time = object->simulator->time;
+
+    // update ffcounter
+    counter -= counter * gamma * GetTimeStep();
+
+    // not in refractory ?
+    DeviceOpticalTransceiver::Message msg;
+    if (time > lastBlinkTime + refractoryPeriod)
+    {	
+	// check for messages
+	if (fish->optical->Receive(msg))
+	{
+	    counter -= epsilon;
+	}
+    }
+
+    // empty msg buffer
+    while (fish->optical->Receive(msg));
+
+    // blink if counter has reached timeout
+    if (counter <= 0.1)
+    {
+	fish->optical->Send(1);
+	lastBlinkTime = time;
+	fish->SetColor(1, 0, 0);
+	counter = 1;
+    }
+    else
+    {
+	fish->SetColor(1, 1, 55.0/254.0);
+    }
     
-    // parameters
-    float obstacleAvoidanceThreshold = 0.05;
-//    float maxProximitySensing = 0.12;
-    float obstacleAvoidanceSpeed = 0.99;
-    float exploreMeanDuration = 5.0;
-    float exploreSpeed = 0.05;
-    float turnSpeed = 0.3;
-    float breakSpeed = 1;
 
-    // state handling
-    int state;
+    // fish->SetTextDrawable(true);
+    // fish->SetText(to_string(counter));
 
-    // time
-    float time;
-
-    // state working variables
-    float exploreDuration;
-    float exploreStartTime;
-
-    int turnPreviousState;
-    float turnDuration;
-    float turnStartTime;
-    float turnSign;
+    return;
     
-    float collisionsDecisionLastTime;
-    
-    // methods
-    ControllerAFish (aFish* fish);
-    ~ControllerAFish ();
+}
 
-    void Step ();
+void ControllerAFish::Reset()
+{
+    lastBlinkTime = 0;
+    fish->SetColor(1, 1, 55.0/254.0);
 
-    void StateExploreInit ();
-    void StateExplore ();
-    void StateTurnInit (int previousState, float angle);
-    void StateTurn ();
-    void Reset ();
-    bool ObstacleAvoidance ();
-};
-
-
-#endif
+    counter = gsl_ran_flat(rng, 0, 1);
+    lastBlinkTime = -refractoryPeriod;
+}

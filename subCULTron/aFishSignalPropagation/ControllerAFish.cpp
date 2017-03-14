@@ -42,7 +42,6 @@ ControllerAFish::ControllerAFish (aFish* fish)
 void ControllerAFish::Step ()
 {
     float time = object->simulator->time;
-    float timestep = object->simulator->timestep;
 
     // if a message is received, record data
     bool messageReceived = false;
@@ -68,7 +67,7 @@ void ControllerAFish::Step ()
     {
 	// with some proba, send a blink
 	float rnd = gsl_ran_flat(rng, 0.0, 1.0);
-	if (rnd < blinkProba * timestep)
+	if (rnd < blinkProba * GetTimeStep())
 	{
 	    fish->optical->Send(1);
 	    lastBlinkTime = time;

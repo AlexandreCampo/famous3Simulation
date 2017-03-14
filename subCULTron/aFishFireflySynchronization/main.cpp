@@ -17,58 +17,23 @@
 /*    along with FaMouS.  If not, see <http://www.gnu.org/licenses/>.         */
 /*----------------------------------------------------------------------------*/
 
-#ifndef CONTROLLER_A_FISH_H
-#define CONTROLLER_A_FISH_H
+#include "Simulator.h"
+#include "Experiment.h"
 
-#include "Controller.h"
-#include "aFish.h"
+#include <iostream>
 
-class ControllerAFish : public Controller
+	
+int main(int argc,char** argv)
 {
-public : 
-    aFish* fish;
+    // setup and run simulated experiment
+    Simulator* simulator = new Simulator ();
 
-    int dbg = 0;
-    
-    // parameters
-    float obstacleAvoidanceThreshold = 0.05;
-//    float maxProximitySensing = 0.12;
-    float obstacleAvoidanceSpeed = 0.99;
-    float exploreMeanDuration = 5.0;
-    float exploreSpeed = 0.05;
-    float turnSpeed = 0.3;
-    float breakSpeed = 1;
+    bool graphics = true;
+    Experiment* exp = new Experiment (simulator, graphics);
+    exp->Run();    
 
-    // state handling
-    int state;
+    delete simulator;
 
-    // time
-    float time;
+    return 0;
+}
 
-    // state working variables
-    float exploreDuration;
-    float exploreStartTime;
-
-    int turnPreviousState;
-    float turnDuration;
-    float turnStartTime;
-    float turnSign;
-    
-    float collisionsDecisionLastTime;
-    
-    // methods
-    ControllerAFish (aFish* fish);
-    ~ControllerAFish ();
-
-    void Step ();
-
-    void StateExploreInit ();
-    void StateExplore ();
-    void StateTurnInit (int previousState, float angle);
-    void StateTurn ();
-    void Reset ();
-    bool ObstacleAvoidance ();
-};
-
-
-#endif

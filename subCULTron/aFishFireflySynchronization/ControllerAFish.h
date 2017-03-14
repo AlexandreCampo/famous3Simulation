@@ -28,33 +28,20 @@ class ControllerAFish : public Controller
 public : 
     aFish* fish;
 
-    int dbg = 0;
+
+    float counter = 1.0;
+    float gamma = 0.2;
+    float epsilon = 0.05;
+    float refractoryPeriod = 0.2;
+    float lastBlinkTime = 0.0;
+
     
-    // parameters
-    float obstacleAvoidanceThreshold = 0.05;
-//    float maxProximitySensing = 0.12;
-    float obstacleAvoidanceSpeed = 0.99;
-    float exploreMeanDuration = 5.0;
-    float exploreSpeed = 0.05;
-    float turnSpeed = 0.3;
-    float breakSpeed = 1;
+    float blinkProba = 0.05;
+    float speed = 0.6;
+    float forwardCoeff = 0.02;
 
-    // state handling
-    int state;
-
-    // time
-    float time;
-
-    // state working variables
-    float exploreDuration;
-    float exploreStartTime;
-
-    int turnPreviousState;
-    float turnDuration;
-    float turnStartTime;
-    float turnSign;
-    
-    float collisionsDecisionLastTime;
+    float leftSpeed;
+    float rightSpeed;
     
     // methods
     ControllerAFish (aFish* fish);
@@ -62,12 +49,9 @@ public :
 
     void Step ();
 
-    void StateExploreInit ();
-    void StateExplore ();
-    void StateTurnInit (int previousState, float angle);
-    void StateTurn ();
+    void DoFirefly();
+    
     void Reset ();
-    bool ObstacleAvoidance ();
 };
 
 

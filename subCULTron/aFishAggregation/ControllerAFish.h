@@ -45,7 +45,6 @@ public :
 
     // time
     float time;
-    float timestep;
 
     // state working variables
     float stateDuration;

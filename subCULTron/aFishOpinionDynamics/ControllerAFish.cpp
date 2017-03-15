@@ -32,33 +32,34 @@ extern long int rngSeed;
 #define EXPLORE 0
 #define TURN 1
 
+using namespace std;
+
 ControllerAFish::ControllerAFish (aFish* fish)
-    : Controller (fish)
 {
     this->fish = fish;
 
-    Reset();
+    reset();
 }
 
-void ControllerAFish::DiffuseAndUpdateOpinion()
+void ControllerAFish::diffuseAndUpdateOpinion()
 {    
     // with some proba, send a blink
     float rnd = gsl_ran_flat(rng, 0.0, 1.0);
-    if (rnd < blinkProba * GetTimeStep())
+    if (rnd < blinkProba * getTimestep())
     {
 	int m = (opinion << 8) + int (confidence * 255);
 	
-	fish->optical->Send(m);
-	fish->SetColor(1, 0, 0);
+	fish->optical->send(m);
+	fish->setColor(1, 0, 0);
     }
     else
-	fish->SetColor(1, 1, 55.0/254.0);
+	fish->setColor(1, 1, 55.0/254.0);
 
 
     // if a message is received, record data
     bool messageReceived = false;
     DeviceOpticalTransceiver::Message msg;
-    while (fish->optical->Receive(msg))
+    while (fish->optical->receive(msg))
     {
 	// decode msg content, contains opinion + confidence
 	int op = msg.content >> 8;
@@ -78,23 +79,23 @@ void ControllerAFish::DiffuseAndUpdateOpinion()
     }
 
     // update local text displayed
-    fish->SetText(to_string(opinion));
+    fish->setText(to_string(opinion));
 }
 
-void ControllerAFish::Step ()
+void ControllerAFish::step ()
 {
     time = object->simulator->time;
 
-    DiffuseAndUpdateOpinion();
+    diffuseAndUpdateOpinion();
     
     switch (state)
     {
-    case EXPLORE : StateExplore(); break;
-    case TURN : StateTurn(); break;
+    case EXPLORE : stateExplore(); break;
+    case TURN : stateTurn(); break;
     }
 }
 
-void ControllerAFish::StateExploreInit ()
+void ControllerAFish::stateExploreInit ()
 {
     float rnd = 1.0 - gsl_ran_flat(rng, 0.0, 1.0);
     exploreDuration = - log (rnd) * exploreMeanDuration;
@@ -103,31 +104,31 @@ void ControllerAFish::StateExploreInit ()
     state = EXPLORE;
 
     // set robot's colour
-    fish->SetColor(1, 1, 55.0/254.0);
+    fish->setColor(1, 1, 55.0/254.0);
 }
 
 
-void ControllerAFish::StateExplore ()
+void ControllerAFish::stateExplore ()
 {
     // if time to change direction -> turn
     if (time - exploreStartTime > exploreDuration)
     {
 	// jump to turn state
 	float angle = gsl_rng_uniform(rng) * 2.0 * M_PI - M_PI;    
-	StateTurnInit(EXPLORE, angle);
+	stateTurnInit(EXPLORE, angle);
 	return;
     }
 
     // inside the state    
-    if (ObstacleAvoidance ())
+    if (obstacleAvoidance ())
 	return;
 
-    fish->propellerLeft->SetSpeed(exploreSpeed);
-    fish->propellerRight->SetSpeed(exploreSpeed);
+    fish->propellerLeft->setSpeed(exploreSpeed);
+    fish->propellerRight->setSpeed(exploreSpeed);
 }
 
 
-void ControllerAFish::StateTurnInit(int previousState, float angle)
+void ControllerAFish::stateTurnInit(int previousState, float angle)
 {
     turnPreviousState = previousState;
 
@@ -141,30 +142,30 @@ void ControllerAFish::StateTurnInit(int previousState, float angle)
     state = TURN;
 }
 
-void ControllerAFish::StateTurn()
+void ControllerAFish::stateTurn()
 {
     // transitions to other states
     if (time - turnStartTime > turnDuration)
     {
 	switch (turnPreviousState)
 	{
-	case EXPLORE : StateExploreInit(); return;
+	case EXPLORE : stateExploreInit(); return;
 	}
     }
 
     // inside the state
-    fish->propellerLeft->SetSpeed(turnSpeed * turnSign);
-    fish->propellerRight->SetSpeed(-turnSpeed * turnSign);
+    fish->propellerLeft->setSpeed(turnSpeed * turnSign);
+    fish->propellerRight->setSpeed(-turnSpeed * turnSign);
 }
 
 
-bool ControllerAFish::ObstacleAvoidance()
+bool ControllerAFish::obstacleAvoidance()
 {    
     // check if an obstacle is perceived 
     int obstaclePerceived = 0;
 
-    float pl = fish->rayFrontLU->GetValue() + fish->rayFrontLD->GetValue() + fish->rayLeft->GetValue();
-    float pr = fish->rayFrontRU->GetValue() + fish->rayFrontRD->GetValue() + fish->rayRight->GetValue();
+    float pl = fish->rayFrontLU->getValue() + fish->rayFrontLD->getValue() + fish->rayLeft->getValue();
+    float pr = fish->rayFrontRU->getValue() + fish->rayFrontRD->getValue() + fish->rayRight->getValue();
     pl /= 3.0;
     pr /= 3.0;   
 
@@ -206,15 +207,15 @@ bool ControllerAFish::ObstacleAvoidance()
     }
     
     // change movement direction
-    fish->propellerLeft->SetSpeed(leftSpeed);
-    fish->propellerRight->SetSpeed(rightSpeed);
+    fish->propellerLeft->setSpeed(leftSpeed);
+    fish->propellerRight->setSpeed(rightSpeed);
 
     // advertise obstacle avoidance in progress
     return true;
 }
 
 
-void ControllerAFish::Reset ()
+void ControllerAFish::reset ()
 {
     // reset time
     time = 0.0;
@@ -230,7 +231,7 @@ void ControllerAFish::Reset ()
     
     // start in explore state
     state = EXPLORE;
-    StateExploreInit();
+    stateExploreInit();
 
     
     // choose one random opinion out of 5
@@ -240,9 +241,8 @@ void ControllerAFish::Reset ()
     confidence = gsl_ran_flat (rng, 0, 1);
 
     cout << "aFish " << this << " initial opinion / confidence " << opinion << " " << confidence << endl;
-    fish->SetTextDrawable(true);
-    fish->SetText(to_string(opinion));
-
+    fish->setTextDrawable(true);
+    fish->setText(to_string(opinion));
 }
 
 

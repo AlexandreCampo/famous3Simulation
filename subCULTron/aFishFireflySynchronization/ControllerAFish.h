@@ -47,11 +47,9 @@ public :
     ControllerAFish (aFish* fish);
     ~ControllerAFish ();
 
-    void Step ();
+    void step ();
 
-    void DoFirefly();
-    
-    void Reset ();
+    void reset ();
 };
 
 

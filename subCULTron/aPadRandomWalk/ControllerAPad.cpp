@@ -33,26 +33,25 @@ extern long int rngSeed;
 #define TURN 1
 
 ControllerAPad::ControllerAPad (aPad* pad)
-    : Controller (pad)
 {
     this->pad = pad;
 
-    Reset();
+    reset();
 }
 
 
-void ControllerAPad::Step ()
+void ControllerAPad::step ()
 {    
     time = object->simulator->time;
     
     switch (state)
     {
-    case EXPLORE : StateExplore(); break;
-    case TURN : StateTurn(); break;
+    case EXPLORE : stateExplore(); break;
+    case TURN : stateTurn(); break;
     }
 }
 
-void ControllerAPad::StateExploreInit ()
+void ControllerAPad::stateExploreInit ()
 {
     float rnd = 1.0 - gsl_ran_flat(rng, 0.0, 1.0);
     exploreDuration = - log (rnd) * exploreMeanDuration;
@@ -61,28 +60,28 @@ void ControllerAPad::StateExploreInit ()
     state = EXPLORE;
 
     // set robot's colour
-    pad->SetColor(1, 1, 55.0/254.0);
+    pad->setColor(1, 1, 55.0/254.0);
 }
 
 
-void ControllerAPad::StateExplore ()
+void ControllerAPad::stateExplore ()
 {
     // if time to change direction -> turn
     if (time - exploreStartTime > exploreDuration)
     {
     	// jump to turn state
     	float angle = gsl_rng_uniform(rng) * 2.0 * M_PI - M_PI;    
-    	StateTurnInit(EXPLORE, angle);
+    	stateTurnInit(EXPLORE, angle);
 
     	return;
     }
 
-    pad->propellerLeft->SetSpeed(exploreSpeed);
-    pad->propellerRight->SetSpeed(exploreSpeed);
+    pad->propellerLeft->setSpeed(exploreSpeed);
+    pad->propellerRight->setSpeed(exploreSpeed);
 }
 
 
-void ControllerAPad::StateTurnInit(int previousState, float angle)
+void ControllerAPad::stateTurnInit(int previousState, float angle)
 {
     turnPreviousState = previousState;
 
@@ -96,23 +95,23 @@ void ControllerAPad::StateTurnInit(int previousState, float angle)
     state = TURN;
 }
 
-void ControllerAPad::StateTurn()
+void ControllerAPad::stateTurn()
 {
     // transitions to other states
     if (time - turnStartTime > turnDuration)
     {
 	switch (turnPreviousState)
 	{
-	case EXPLORE : StateExploreInit(); return;
+	case EXPLORE : stateExploreInit(); return;
 	}
     }
 
     // inside the state
-    pad->propellerLeft->SetSpeed(turnSpeed * turnSign);
-    pad->propellerRight->SetSpeed(-turnSpeed * turnSign);
+    pad->propellerLeft->setSpeed(turnSpeed * turnSign);
+    pad->propellerRight->setSpeed(-turnSpeed * turnSign);
 }
 
-void ControllerAPad::Reset ()
+void ControllerAPad::reset ()
 {
     // reset time
     time = 0.0;
@@ -128,10 +127,10 @@ void ControllerAPad::Reset ()
     
     // start in explore state
     state = EXPLORE;
-    StateExploreInit();
+    stateExploreInit();
 
     state = TURN;
-    StateTurnInit(EXPLORE, M_PI);
+    stateTurnInit(EXPLORE, M_PI);
 }
 
 

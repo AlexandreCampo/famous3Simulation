@@ -69,19 +69,19 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
     init_rng(&rng);        
 
     // add services
-    simulator->SetTimeStep (0.05);
+    simulator->setTimestep (0.05);
     physics = new PhysicsBullet();
-    physics->SetTimeStep(0.05);
-    simulator->Add (physics);
+    physics->setTimestep(0.05);
+    simulator->add (physics);
     float waterDensity = 1000.0;
     waterVolume = new WaterVolume(waterDensity, calculateWaterVolumeHeight, calculateWaterVolumeCurrent);
-    simulator->Add (waterVolume);
+    simulator->add (waterVolume);
     
     render = NULL;
     if (graphics)
     {	
 	render = new RenderOSG(simulator);
-	simulator->Add (render);
+	simulator->add (render);
 
 	// setup camera of the render service
 	render->viewer->getCamera()->setProjectionMatrixAsPerspective(45.0, 1.0, 0.1, 1000); 
@@ -94,44 +94,46 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
     }
 
     // add the experiment so that we can step regularly
-    simulator->Add (this);
+    simulator->add (this);
     
     // add aPads
     for (int i = 0; i < aPadCount; i++)
     {
 	aPad* r = new aPad ();
-	r->Register(physics);
-	r->Register(waterVolume);
+	r->registerService(physics);
+	r->registerService(waterVolume);
 	if (render) 
 	{	    
-	    r->SetMeshFilename ("../3dmodels/aPad.3ds.(0.025,0.025,0.025).scale");
-	    r->Register(render); 
+	    r->setMeshFilename ("../3dmodels/aPad.3ds.(0.025,0.025,0.025).scale");
+	    r->registerService(render); 
 	}	
-	r->AddDevices();	
+	r->addDevices();	
 	
-	ControllerAPad* c = new ControllerAPad (r);
-	c->SetTimeStep(0.1);
+	ControllerAPad* c = new ControllerAPad (r);	
+	r->add(c);
+	c->setTimestep(0.1);
+	
 	aPads.push_back(r);
-	simulator->Add(r);   	
+	simulator->add(r);   	
 	
 	// position is set in reset
     }
 
     AquariumCircular* aquarium = new AquariumCircular(aquariumRadius,  3.0, 1.0, 40.0);
-    aquarium->Register(physics);
-    aquarium->Register(waterVolume);
-    if (render) aquarium->Register(render);
-    simulator->Add(aquarium);
+    aquarium->registerService(physics);
+    aquarium->registerService(waterVolume);
+    if (render) aquarium->registerService(render);
+    simulator->add(aquarium);
 
     // set last stuff, position of robots mainly
-    Reset();
+    reset();
 }
 
 Experiment::~Experiment()
 {
 }
 
-void Experiment::Reset ()
+void Experiment::reset ()
 {
     // reset aPad
     for (unsigned int i = 0; i < aPads.size(); i++)
@@ -149,30 +151,30 @@ void Experiment::Reset ()
 	float y = sin(angle) * distance;
 	float z = 2.0 + r->dimensions[2] / 2.0;	
 
-	r->SetPosition (btVector3(x, y, z));
-	r->SetRotation (btQuaternion(btVector3(0, 0, 1), 0));
+	r->setPosition (btVector3(x, y, z));
+	r->setRotation (btQuaternion(btVector3(0, 0, 1), 0));
 	for (auto* b : r->ballasts)
-	    b->SetBuoyancyFactor(1);
+	    b->setBuoyancyFactor(1);
     }
 }
 
-void Experiment::Step ()
+void Experiment::step ()
 {       
 }
 
-void Experiment::Run()
+void Experiment::run()
 {
     // with render, give up control and stepping is done by render
     if (render)
     {
-	render->SetPaused (true);
-	render->Run();
+	render->setPaused (true);
+	render->run();
     }
     else
     {
 	while(simulator->time < maxTime)
 	{
-	    simulator->Step();
+	    simulator->step();
 	}
     }
 }

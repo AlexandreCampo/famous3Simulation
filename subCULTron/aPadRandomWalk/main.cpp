@@ -30,7 +30,7 @@ int main(int argc,char** argv)
 
     bool graphics = true;
     Experiment* exp = new Experiment (simulator, graphics);
-    exp->Run();    
+    exp->run();    
 
     delete simulator;
 

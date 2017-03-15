@@ -26,31 +26,33 @@
 
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
+
 extern gsl_rng* rng;
 extern long int rngSeed;
 
 #define EXPLORE 0
 #define TURN 1
 
+using namespace std;
+
 ControllerAFish::ControllerAFish (aFish* fish)
-    : Controller (fish)
 {
     this->fish = fish;
 
-    Reset();
+    reset();
 }
 
 
-void ControllerAFish::Step ()
+void ControllerAFish::step ()
 {
     time = object->simulator->time;
 
     // send a message
-    fish->optical->Send(1);
+    fish->optical->send(1);
     
     // receive messages
     DeviceOpticalTransceiver::Message msg;
-    while (fish->optical->Receive(msg))
+    while (fish->optical->receive(msg))
     {
 	if (dbg) cout << this << " fish received msg " << msg.content << " at time " << time << endl;
     }
@@ -58,12 +60,12 @@ void ControllerAFish::Step ()
     
     switch (state)
     {
-    case EXPLORE : StateExplore(); break;
-    case TURN : StateTurn(); break;
+    case EXPLORE : stateExplore(); break;
+    case TURN : stateTurn(); break;
     }
 }
 
-void ControllerAFish::StateExploreInit ()
+void ControllerAFish::stateExploreInit ()
 {
     float rnd = 1.0 - gsl_ran_flat(rng, 0.0, 1.0);
     exploreDuration = - log (rnd) * exploreMeanDuration;
@@ -72,33 +74,33 @@ void ControllerAFish::StateExploreInit ()
     state = EXPLORE;
 
     // set robot's colour
-    fish->SetColor(1, 1, 55.0/254.0);
+    fish->setColor(1, 1, 55.0/254.0);
 }
 
 
-void ControllerAFish::StateExplore ()
+void ControllerAFish::stateExplore ()
 {
     // if time to change direction -> turn
     if (time - exploreStartTime > exploreDuration)
     {
 	// jump to turn state
 	float angle = gsl_rng_uniform(rng) * 2.0 * M_PI - M_PI;    
-	StateTurnInit(EXPLORE, angle);
+	stateTurnInit(EXPLORE, angle);
 
 //	cout << "turning" << endl;
 	return;
     }
 
     // inside the state    
-    if (ObstacleAvoidance ())
+    if (obstacleAvoidance ())
 	return;
 
-    fish->propellerLeft->SetSpeed(exploreSpeed);
-    fish->propellerRight->SetSpeed(exploreSpeed);
+    fish->propellerLeft->setSpeed(exploreSpeed);
+    fish->propellerRight->setSpeed(exploreSpeed);
 }
 
 
-void ControllerAFish::StateTurnInit(int previousState, float angle)
+void ControllerAFish::stateTurnInit(int previousState, float angle)
 {
     turnPreviousState = previousState;
 
@@ -112,30 +114,30 @@ void ControllerAFish::StateTurnInit(int previousState, float angle)
     state = TURN;
 }
 
-void ControllerAFish::StateTurn()
+void ControllerAFish::stateTurn()
 {
     // transitions to other states
     if (time - turnStartTime > turnDuration)
     {
 	switch (turnPreviousState)
 	{
-	case EXPLORE : StateExploreInit(); return;
+	case EXPLORE : stateExploreInit(); return;
 	}
     }
 
     // inside the state
-    fish->propellerLeft->SetSpeed(turnSpeed * turnSign);
-    fish->propellerRight->SetSpeed(-turnSpeed * turnSign);
+    fish->propellerLeft->setSpeed(turnSpeed * turnSign);
+    fish->propellerRight->setSpeed(-turnSpeed * turnSign);
 }
 
 
-bool ControllerAFish::ObstacleAvoidance()
+bool ControllerAFish::obstacleAvoidance()
 {    
     // check if an obstacle is perceived 
     int obstaclePerceived = 0;
 
-    float pl = fish->rayFrontLU->GetValue() + fish->rayFrontLD->GetValue() + fish->rayLeft->GetValue();
-    float pr = fish->rayFrontRU->GetValue() + fish->rayFrontRD->GetValue() + fish->rayRight->GetValue();
+    float pl = fish->rayFrontLU->getValue() + fish->rayFrontLD->getValue() + fish->rayLeft->getValue();
+    float pr = fish->rayFrontRU->getValue() + fish->rayFrontRD->getValue() + fish->rayRight->getValue();
     pl /= 3.0;
     pr /= 3.0;   
 
@@ -177,15 +179,15 @@ bool ControllerAFish::ObstacleAvoidance()
     }
     
     // change movement direction
-    fish->propellerLeft->SetSpeed(leftSpeed);
-    fish->propellerRight->SetSpeed(rightSpeed);
+    fish->propellerLeft->setSpeed(leftSpeed);
+    fish->propellerRight->setSpeed(rightSpeed);
 
     // advertise obstacle avoidance in progress
     return true;
 }
 
 
-void ControllerAFish::Reset ()
+void ControllerAFish::reset ()
 {
     // reset time
     time = 0.0;
@@ -201,7 +203,7 @@ void ControllerAFish::Reset ()
     
     // start in explore state
     state = EXPLORE;
-    StateExploreInit();
+    stateExploreInit();
 }
 
 

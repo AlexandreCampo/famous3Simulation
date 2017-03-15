@@ -31,15 +31,14 @@ extern long int rngSeed;
 
 
 ControllerAFish::ControllerAFish (aFish* fish)
-    : Controller (fish)
 {
     this->fish = fish;
 
-    Reset();
+    reset();
 }
 
 
-void ControllerAFish::Step ()
+void ControllerAFish::step ()
 {
     float time = object->simulator->time;
 
@@ -49,7 +48,7 @@ void ControllerAFish::Step ()
     float y = 0;
     int n = 0;
     DeviceOpticalTransceiver::Message msg;
-    while (fish->optical->Receive(msg))
+    while (fish->optical->receive(msg))
     {
 	messageReceived = true;
 	x += msg.direction.x();
@@ -67,22 +66,22 @@ void ControllerAFish::Step ()
     {
 	// with some proba, send a blink
 	float rnd = gsl_ran_flat(rng, 0.0, 1.0);
-	if (rnd < blinkProba * GetTimeStep())
+	if (rnd < blinkProba * getTimestep())
 	{
-	    fish->optical->Send(1);
+	    fish->optical->send(1);
 	    lastBlinkTime = time;
-	    fish->SetColor(1, 0, 0);
+	    fish->setColor(1, 0, 0);
 	}
 	// relay blink ?
 	else if (messageReceived)
 	{
-	    fish->optical->Send(1);
+	    fish->optical->send(1);
 	    lastBlinkTime = time;
-	    fish->SetColor(1, 0, 0);
+	    fish->setColor(1, 0, 0);
 	}
 	else
 	{
-	    fish->SetColor(1, 1, 55.0/254.0);
+	    fish->setColor(1, 1, 55.0/254.0);
 	}
 
 	// get attracted towards message emitters
@@ -118,16 +117,16 @@ void ControllerAFish::Step ()
 	}
     }
 
-    fish->propellerLeft->SetSpeed(leftSpeed);
-    fish->propellerRight->SetSpeed(rightSpeed);	    
+    fish->propellerLeft->setSpeed(leftSpeed);
+    fish->propellerRight->setSpeed(rightSpeed);	    
 
     return;
 }
 
-void ControllerAFish::Reset()
+void ControllerAFish::reset()
 {
     lastBlinkTime = 0;
-    fish->SetColor(1, 1, 55.0/254.0);
+    fish->setColor(1, 1, 55.0/254.0);
     leftSpeed = 0;
     rightSpeed = 0;
 }

@@ -62,18 +62,18 @@ public :
     ControllerAFish (aFish* fish);
     ~ControllerAFish ();
 
-    void Step ();
+    void step ();
 
-    void StateExploreInit ();
-    void StateExplore ();
-    void StateBrakeInit ();
-    void StateBrake ();
-    void StateRestInit ();
-    void StateRest ();
-    void StateTurnInit (int previousState, float angle);
-    void StateTurn ();
-    void Reset ();
-    bool ObstacleAvoidance ();
+    void stateExploreInit ();
+    void stateExplore ();
+    void stateBrakeInit ();
+    void stateBrake ();
+    void stateRestInit ();
+    void stateRest ();
+    void stateTurnInit (int previousState, float angle);
+    void stateTurn ();
+    void reset ();
+    bool obstacleAvoidance ();
 };
 
 

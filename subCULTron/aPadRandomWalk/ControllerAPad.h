@@ -54,13 +54,13 @@ public :
     ControllerAPad (aPad* pad);
     ~ControllerAPad ();
 
-    void Step ();
+    void step ();
 
-    void StateExploreInit ();
-    void StateExplore ();
-    void StateTurnInit (int previousState, float angle);
-    void StateTurn ();
-    void Reset ();
+    void stateExploreInit ();
+    void stateExplore ();
+    void stateTurnInit (int previousState, float angle);
+    void stateTurn ();
+    void reset ();
 };
 
 

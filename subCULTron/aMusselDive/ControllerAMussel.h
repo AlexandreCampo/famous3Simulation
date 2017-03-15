@@ -34,9 +34,9 @@ public :
     
     ControllerAMussel (aMussel* m);
     ~ControllerAMussel ();
-    void Reset();
+    void reset();
 
-    void Step ();
+    void step ();
 };
 
 

@@ -41,9 +41,9 @@ public :
     ControllerAFish (aFish* fish);
     ~ControllerAFish ();
 
-    void Step ();
+    void step ();
 
-    void Reset ();
+    void reset ();
 };
 
 

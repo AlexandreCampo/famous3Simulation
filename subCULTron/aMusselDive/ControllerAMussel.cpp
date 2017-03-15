@@ -31,11 +31,10 @@ extern long int rngSeed;
 
 
 ControllerAMussel::ControllerAMussel (aMussel* mussel)
-    : Controller (mussel)
 {
     this->mussel = mussel;
     
-    Reset ();
+    reset ();
 }
 
 
@@ -43,13 +42,13 @@ ControllerAMussel::~ControllerAMussel ()
 {
 }
 
-void ControllerAMussel::Reset ()
+void ControllerAMussel::reset ()
 {
     lastTime = 0.0;
     factor = -1;
 }
 
-void ControllerAMussel::Step ()
+void ControllerAMussel::step ()
 {
     if (mussel->simulator->time - lastTime >= 10.0) 
     {
@@ -58,6 +57,6 @@ void ControllerAMussel::Step ()
 	if (factor < -0.5) factor = 1.0;
 	else factor = -1.0;
 
-	mussel->ballast->SetBuoyancyFactor(factor);
+	mussel->ballast->setBuoyancyFactor(factor);
     }
 }

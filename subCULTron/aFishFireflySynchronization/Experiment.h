@@ -54,9 +54,9 @@ public:
     Experiment (Simulator* s, bool graphics);
     ~Experiment ();
 
-    void Reset ();
-    void Step ();
-    void Run();
+    void reset ();
+    void step ();
+    void run();
 };
 
 

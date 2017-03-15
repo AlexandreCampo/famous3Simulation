@@ -31,59 +31,58 @@ extern long int rngSeed;
 
 
 ControllerAFish::ControllerAFish (aFish* fish)
-    : Controller (fish)
 {
     this->fish = fish;
 
-    Reset();
+    reset();
 }
 
-void ControllerAFish::Step ()
+void ControllerAFish::step ()
 {
     float time = object->simulator->time;
 
     // update ffcounter
-    counter -= counter * gamma * GetTimeStep();
+    counter -= counter * gamma * getTimestep();
 
     // not in refractory ?
     DeviceOpticalTransceiver::Message msg;
     if (time > lastBlinkTime + refractoryPeriod)
     {	
 	// check for messages
-	if (fish->optical->Receive(msg))
+	if (fish->optical->receive(msg))
 	{
 	    counter -= epsilon;
 	}
     }
 
     // empty msg buffer
-    while (fish->optical->Receive(msg));
+    while (fish->optical->receive(msg));
 
     // blink if counter has reached timeout
     if (counter <= 0.1)
     {
-	fish->optical->Send(1);
+	fish->optical->send(1);
 	lastBlinkTime = time;
-	fish->SetColor(1, 0, 0);
+	fish->setColor(1, 0, 0);
 	counter = 1;
     }
     else
     {
-	fish->SetColor(1, 1, 55.0/254.0);
+	fish->setColor(1, 1, 55.0/254.0);
     }
     
 
-    // fish->SetTextDrawable(true);
-    // fish->SetText(to_string(counter));
+    // fish->setTextDrawable(true);
+    // fish->setText(to_string(counter));
 
     return;
     
 }
 
-void ControllerAFish::Reset()
+void ControllerAFish::reset()
 {
     lastBlinkTime = 0;
-    fish->SetColor(1, 1, 55.0/254.0);
+    fish->setColor(1, 1, 55.0/254.0);
 
     counter = gsl_ran_flat(rng, 0, 1);
     lastBlinkTime = -refractoryPeriod;

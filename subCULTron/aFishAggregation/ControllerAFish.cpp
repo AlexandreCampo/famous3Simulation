@@ -35,20 +35,19 @@ extern long int rngSeed;
 #define REST 3
 
 ControllerAFish::ControllerAFish (aFish* fish)
-    : Controller (fish)
 {
     this->fish = fish;
 
-    Reset();
+    reset();
 }
 
 
-void ControllerAFish::Step ()
+void ControllerAFish::step ()
 {
     time = object->simulator->time;
 
     // send a message in all directions
-    fish->optical->Send(1);
+    fish->optical->send(1);
     
     // receive messages
     messagesReceived = 0;
@@ -56,7 +55,7 @@ void ControllerAFish::Step ()
     msgy = 0;
     int n = 0;
     DeviceOpticalTransceiver::Message msg;    
-    while (fish->optical->Receive(msg))
+    while (fish->optical->receive(msg))
     {
 	messagesReceived++;
 	msgx += msg.direction.x();
@@ -78,14 +77,14 @@ void ControllerAFish::Step ()
     
     switch (state)
     {
-    case EXPLORE : StateExplore(); break;
-    case TURN : StateTurn(); break;
-    case REST : StateRest(); break;
-    case BRAKE : StateBrake(); break;
+    case EXPLORE : stateExplore(); break;
+    case TURN : stateTurn(); break;
+    case REST : stateRest(); break;
+    case BRAKE : stateBrake(); break;
     }
 }
 
-void ControllerAFish::StateExploreInit ()
+void ControllerAFish::stateExploreInit ()
 {
     float rnd = 1.0 - gsl_ran_flat(rng, 0.0, 1.0);
     stateDuration = - log (rnd) * exploreMeanDuration;
@@ -94,16 +93,16 @@ void ControllerAFish::StateExploreInit ()
     state = EXPLORE;
 
     // set robot's colour
-    fish->SetColor(1, 1, 55.0/254.0);
+    fish->setColor(1, 1, 55.0/254.0);
 }
 
 
-void ControllerAFish::StateExplore ()
+void ControllerAFish::stateExplore ()
 {
     // if several messages received -> stop
     if (messagesReceived >= 3)
     {
-	StateBrakeInit();
+	stateBrakeInit();
 	return;
     }
     
@@ -112,21 +111,21 @@ void ControllerAFish::StateExplore ()
     {
 	// jump to turn state
 	float angle = gsl_rng_uniform(rng) * 2.0 * M_PI - M_PI;    
-	StateTurnInit(EXPLORE, angle);
+	stateTurnInit(EXPLORE, angle);
 
 	return;
     }
 
     // inside the state    
-    if (ObstacleAvoidance ())
+    if (obstacleAvoidance ())
 	return;
 
-    fish->propellerLeft->SetSpeed(exploreSpeed);
-    fish->propellerRight->SetSpeed(exploreSpeed);
+    fish->propellerLeft->setSpeed(exploreSpeed);
+    fish->propellerRight->setSpeed(exploreSpeed);
 }
 
 
-void ControllerAFish::StateTurnInit(int previousState, float angle)
+void ControllerAFish::stateTurnInit(int previousState, float angle)
 {
     turnPreviousState = previousState;
 
@@ -139,68 +138,68 @@ void ControllerAFish::StateTurnInit(int previousState, float angle)
     stateStartTime = time;
     state = TURN;
 
-    fish->propellerLeft->SetSpeed(turnSpeed * turnSign);
-    fish->propellerRight->SetSpeed(-turnSpeed * turnSign);
+    fish->propellerLeft->setSpeed(turnSpeed * turnSign);
+    fish->propellerRight->setSpeed(-turnSpeed * turnSign);
 }
 
-void ControllerAFish::StateTurn()
+void ControllerAFish::stateTurn()
 {
     // transitions to other states
     if (time - stateStartTime > stateDuration)
     {
 	switch (turnPreviousState)
 	{
-	case EXPLORE : StateExploreInit(); return;
+	case EXPLORE : stateExploreInit(); return;
 	}
     }
 }
 
 
-void ControllerAFish::StateBrakeInit ()
+void ControllerAFish::stateBrakeInit ()
 {
     stateStartTime = time;
     state = BRAKE;
 
-    fish->SetColor(1, 0, 0);
+    fish->setColor(1, 0, 0);
 
-    fish->propellerLeft->SetSpeed(-brakeSpeed);
-    fish->propellerRight->SetSpeed(-brakeSpeed);
+    fish->propellerLeft->setSpeed(-brakeSpeed);
+    fish->propellerRight->setSpeed(-brakeSpeed);
 }
 
 
-void ControllerAFish::StateBrake ()
+void ControllerAFish::stateBrake ()
 {
     if (time - stateStartTime > brakeDuration)
     {
-	StateRestInit();
+	stateRestInit();
 	return;
     }
 }
 
 
-void ControllerAFish::StateRestInit ()
+void ControllerAFish::stateRestInit ()
 {
     stateDuration = restDuration;
 
     stateStartTime = time;
     state = REST;
 
-    fish->SetColor(55.0/255.0, 1, 55.0/255.0);
+    fish->setColor(55.0/255.0, 1, 55.0/255.0);
     
-    fish->propellerLeft->SetSpeed(0);
-    fish->propellerRight->SetSpeed(0);
+    fish->propellerLeft->setSpeed(0);
+    fish->propellerRight->setSpeed(0);
 
 //    cout << this << " init rest" << endl;
 }
 
 
-void ControllerAFish::StateRest ()
+void ControllerAFish::stateRest ()
 {
     // if time to change direction -> turn
     if (time - stateStartTime > stateDuration)
     {
 	// jump to explore state
-	StateExploreInit();
+	stateExploreInit();
 
 	return;
     }
@@ -240,18 +239,18 @@ void ControllerAFish::StateRest ()
 	}
     }
 
-    fish->propellerLeft->SetSpeed(ls);
-    fish->propellerRight->SetSpeed(rs);
+    fish->propellerLeft->setSpeed(ls);
+    fish->propellerRight->setSpeed(rs);
     
 }
 
-bool ControllerAFish::ObstacleAvoidance()
+bool ControllerAFish::obstacleAvoidance()
 {    
     // check if an obstacle is perceived 
     int obstaclePerceived = 0;
 
-    float pl = fish->rayFrontLU->GetValue() + fish->rayFrontLD->GetValue() + fish->rayLeft->GetValue();
-    float pr = fish->rayFrontRU->GetValue() + fish->rayFrontRD->GetValue() + fish->rayRight->GetValue();
+    float pl = fish->rayFrontLU->getValue() + fish->rayFrontLD->getValue() + fish->rayLeft->getValue();
+    float pr = fish->rayFrontRU->getValue() + fish->rayFrontRD->getValue() + fish->rayRight->getValue();
     pl /= 3.0;
     pr /= 3.0;   
 
@@ -293,15 +292,15 @@ bool ControllerAFish::ObstacleAvoidance()
     }
     
     // change movement direction
-    fish->propellerLeft->SetSpeed(leftSpeed);
-    fish->propellerRight->SetSpeed(rightSpeed);
+    fish->propellerLeft->setSpeed(leftSpeed);
+    fish->propellerRight->setSpeed(rightSpeed);
 
     // advertise obstacle avoidance in progress
     return true;
 }
 
 
-void ControllerAFish::Reset ()
+void ControllerAFish::reset ()
 {
     // reset time
     time = 0.0;
@@ -315,7 +314,7 @@ void ControllerAFish::Reset ()
     
     // start in explore state
     state = EXPLORE;
-    StateExploreInit();
+    stateExploreInit();
 }
 
 

@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*    Copyright (C) 2011-2012 Alexandre Campo                                 */
+/*    Copyright (C) 2011-2017 Alexandre Campo                                 */
 /*                                                                            */
 /*    This file is part of FaMouS  (a fast, modular and simple simulator).    */
 /*                                                                            */

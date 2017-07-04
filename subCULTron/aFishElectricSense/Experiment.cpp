@@ -110,6 +110,13 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
 	r->setDragCoefficients(btVector3( 0.05, 0.3, 0.1), btVector3( 0.05, 0.05, 0.1));
 
 	ControllerAFish* c = new ControllerAFish (r);
+
+	// set dbg flag for some afish
+	if (i < aFishActiveCount)
+	    c->dbg = 1;
+	else
+	    c->dbg = 0;
+	
 	r->add(c);
 	c->setTimestep(0.1);
 
@@ -119,10 +126,10 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
 	// position is set in reset
     }
 
-    // create one debug afish
-    ControllerAFish* c = (ControllerAFish*) aFishes[0]->controllers.front();
+    // set debug afish
+//    ControllerAFish* c = (ControllerAFish*) aFishes[0]->controllers.front();
 //    aFishes[0]->optical->setDrawable(true);
-    c->dbg=1;
+//    c->dbg=1;
 
     AquariumCircular* aquarium = new AquariumCircular(aquariumRadius,  3.0, 1.0, 40.0);
     aquarium->registerService(physics);

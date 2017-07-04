@@ -55,7 +55,9 @@ public:
     int aMusselCount = 0;
     float maxTime = 3600;
     float aquariumRadius = 1.0;    
-   
+
+    int aFishActiveCount = 1;
+    
     // methods
     Experiment (Simulator* s, bool graphics);
     ~Experiment ();

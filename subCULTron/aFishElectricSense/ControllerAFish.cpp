@@ -50,7 +50,16 @@ void ControllerAFish::step ()
     time = object->simulator->time;
 
     Eigen::VectorXf pola(5);
-    pola << 1, 0, 0, 0, 0;
+
+    // only fish 0 has dbg set to 1
+    if (dbg)
+    {
+	pola << 1, 0, 0, 0, 0;
+    }
+    else
+    {
+	pola << 0, 0, 0, 0, 0;
+    }
     fish->esense->setPolarization (pola);
     
     // read e-sense

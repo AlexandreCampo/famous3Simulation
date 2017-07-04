@@ -27,11 +27,9 @@
 // Objects
 #include "AquariumCircular.h"
 #include "aFish.h"
-#include "aPad.h"
-#include "aMussel.h"
 
 // Controllers
-#include "ControllerAPad.h"
+#include "ControllerAFish.h"
 #include "Experiment.h"
 
 // Utilities
@@ -53,8 +51,7 @@ float calculateWaterVolumeHeight(btVector3 pos, float time)
     float shift = time / M_PI * 2.0;
     float height = 2.0 + amplitude * (sin(pos.getX() * phase + shift) * sin(pos.getY() * phase + shift));    
     
-    return height;
-    
+    return height;    
 }
 
 btVector3 calculateWaterVolumeCurrent(btVector3 pos, float time)
@@ -87,7 +84,7 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
 	render->viewer->getCamera()->setProjectionMatrixAsPerspective(45.0, 1.0, 0.1, 1000); 
 
 	osgGA::SphericalManipulator* manip = dynamic_cast<osgGA::SphericalManipulator*>(render->viewer->getCameraManipulator());
-	manip->setDistance(19);
+	manip->setDistance(7);
 	manip->setCenter(osg::Vec3(0,0,1.0));
 	manip->setElevation(90.0 * M_PI / 180.0);
 	manip->setHeading(0.0 * M_PI / 180.0);
@@ -96,30 +93,38 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
     // add the experiment so that we can step regularly
     simulator->add (this);
     
-    // add aPads
-    for (int i = 0; i < aPadCount; i++)
+    // add aFish
+    for (int i = 0; i < aFishCount; i++)
     {
-	aPad* r = new aPad ();
+	aFish* r = new aFish ();
 	r->registerService(physics);
 	r->registerService(waterVolume);
 	if (render) 
 	{	    
-	    r->setMeshFilename ("../3dmodels/aPad.3ds.(0.025,0.025,0.025).scale");
+	    r->setMeshFilename ("../3dmodels/aFish.3ds.(0.01,0.01,0.01).scale");
 	    r->registerService(render); 
-	}	
-	r->addDevices();	
-	
-	ControllerAPad* c = new ControllerAPad (r);	
+	}
+	r->addDevices();
+//	r->optical->setDrawable(true);
+//	r->optical->setReceiveOmnidirectional(false);
+	r->setDragCoefficients(btVector3( 0.05, 0.3, 0.1), btVector3( 0.05, 0.05, 0.1));
+
+	ControllerAFish* c = new ControllerAFish (r);
 	r->add(c);
 	c->setTimestep(0.1);
-	
-	aPads.push_back(r);
+
+	aFishes.push_back(r);
 	simulator->add(r);   	
 	
 	// position is set in reset
     }
 
-    AquariumCircular* aquarium = new AquariumCircular(aquariumRadius,  10.0, 1.0, 40.0);
+    // create one debug afish
+    ControllerAFish* c = (ControllerAFish*) aFishes[0]->controllers.front();
+//    aFishes[0]->optical->setDrawable(true);
+    c->dbg=1;
+
+    AquariumCircular* aquarium = new AquariumCircular(aquariumRadius,  3.0, 1.0, 40.0);
     aquarium->registerService(physics);
     aquarium->registerService(waterVolume);
     if (render) aquarium->registerService(render);
@@ -135,28 +140,21 @@ Experiment::~Experiment()
 
 void Experiment::reset ()
 {
-    // reset aPad
-    for (unsigned int i = 0; i < aPads.size(); i++)
+    // reset aFish
+    for (unsigned int i = 0; i < aFishes.size(); i++)
     {
-	aPad* r = aPads[i];
+	aFish* r = aFishes[i];
 
-	r->body->setLinearVelocity(btVector3(0,0,0));
-	r->body->setAngularVelocity(btVector3(0,0,0));
-	
-	// reset position
-	float k = (float)(i) / (float) (aPads.size());
-	float distance = (0.7 + (k * 0.2 - 0.1)) * aquariumRadius;
-	float angle = 2.0 * M_PI * k + M_PI/4;;
-	// float distance = gsl_rng_uniform(rng) * 0.8 * aquariumRadius;
-	// float angle = (gsl_rng_uniform(rng) * 2.0 * M_PI - M_PI);
+	// reset aFish position
+	float distance = gsl_rng_uniform(rng) * 0.8 * aquariumRadius;
+	float angle = (gsl_rng_uniform(rng) * 2.0 * M_PI - M_PI);
 	float x = cos(angle) * distance;
 	float y = sin(angle) * distance;
-	float z = 2.0 + r->dimensions[2] / 2.0;		
-	
+	float z = 0.7 + r->dimensions[2] / 2.0;	
+
 	r->setPosition (btVector3(x, y, z));
-	r->setRotation (btQuaternion(btVector3(0, 0, 1), 0));
-	for (auto* b : r->ballasts)
-	    b->setBuoyancyFactor(1);
+	r->setRotation (btQuaternion(btVector3(0, 0, 1), gsl_rng_uniform(rng) * M_PI * 2.0 - M_PI));
+	r->ballast->setBuoyancyFactor(0.0);
     }
 }
 

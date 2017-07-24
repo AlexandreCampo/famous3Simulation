@@ -9,6 +9,7 @@ solution "experiment"
       includedirs { "/usr/include/libfamous" }
       includedirs { "/usr/local/include/libfamous" }
       includedirs { "/usr/include/bullet" }
+      includedirs { "/usr/include/eigen3" }
 
       libdirs { os.findlib("glut"), os.findlib("GL"), os.findlib("GLU"), 
       	        os.findlib("gsl"), os.findlib("BulletDynamics"), 

@@ -50,6 +50,7 @@ void ControllerAMussel::reset ()
 
 void ControllerAMussel::step ()
 {
+           
     if (mussel->simulator->time - lastTime >= 10.0) 
     {
 	lastTime = mussel->simulator->time;

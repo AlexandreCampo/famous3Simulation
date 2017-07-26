@@ -43,34 +43,55 @@ ControllerAPad::ControllerAPad (aPad* pad)
 void ControllerAPad::step ()
 {    
     time = object->simulator->time;
-
-    // try to dock
+    
+    // use dock slots one by one
+    bool rw = true;
     if (dockSlot < 4)
-    {    
-	// figure out if there is a dockable device in range
-	btVector3 dockableRelPos = pad->dockers[dockSlot]->getClosestDockableDevice();
-
-	if (!dockableRelPos.isZero())
+    {
+	btVector3 pos = pad->dockers[dockSlot]->getClosestDockableDevice();
+	
+	if (!pos.isZero())
 	{
-	    // move towards dockable device
-	    // TODO
-	    
+	    float angle = atan2(pos.y(), pos.x());
+	    while (angle > M_PI) angle -= M_PI * 2;
+	    while (angle < -M_PI) angle += M_PI * 2;
+	    	    
+	    if (fabs(angle) < 20.0 * M_PI / 180.0)
+	    {
+		// move towards dockable device
+		pad->propellerLeft->setSpeed(0);
+		pad->propellerRight->setSpeed(0);
+		pad->propellerCentral->setOrientation(btQuaternion(btVector3(0,0,1), -M_PI/2 * dockSlot));
+		pad->propellerCentral->setSpeed(0.5);		
+	    }
+	    // rotate right
+	    else if (angle < 0)
+	    {
+		pad->propellerCentral->setSpeed(0);
+		pad->propellerRight->setSpeed(0.5);
+		pad->propellerLeft->setSpeed(-0.5);
+	    }
+	    // rotate left
+	    else
+	    {
+		pad->propellerCentral->setSpeed(0);
+		pad->propellerRight->setSpeed(-0.5);
+		pad->propellerLeft->setSpeed(0.5);
+	    }
+		
+	    rw = false;
+		
 	    // try to dock to first guy
 	    bool dockSuccess = pad->dockers[dockSlot]->dock();
 	    if (dockSuccess)
 	    {
 		dockSlot++;
-		if (dockSlot == 4)
-		{
-		    fullDockedLastTime = time;
-		}
+		fullDockedLastTime = time;		
 	    }
-	}
+	}	
     }
     else
     {
-	std::cout << fullDockedLastTime << " " << time << std::endl;
-	
 	if (time - fullDockedLastTime > 60)
 	{
 	    for (int i = 0; i < 4; i++)
@@ -80,13 +101,19 @@ void ControllerAPad::step ()
 	{
 	    dockSlot = 0;
 	}
+
     }
 
-    // random walk
-    switch (state)
+    if (rw)
     {
-    case EXPLORE : stateExplore(); break;
-    case TURN : stateTurn(); break;
+	pad->propellerCentral->setSpeed(0);
+	
+	// random walk
+	switch (state)
+	{
+	case EXPLORE : stateExplore(); break;
+	case TURN : stateTurn(); break;
+	}	
     }
 }
 
@@ -115,8 +142,10 @@ void ControllerAPad::stateExplore ()
     	return;
     }
 
-    pad->propellerLeft->setSpeed(exploreSpeed);
-    pad->propellerRight->setSpeed(exploreSpeed);
+    pad->propellerLeft->setSpeed(0);
+    pad->propellerRight->setSpeed(0);
+    pad->propellerCentral->setOrientation(btQuaternion(btVector3(0,0,1), -M_PI/2 * dockSlot));
+    pad->propellerCentral->setSpeed(0.5);		
 }
 
 
@@ -171,7 +200,6 @@ void ControllerAPad::reset ()
     state = TURN;
     stateTurnInit(EXPLORE, M_PI);
 
-    // ...
     dockSlot = 0;
 }
 

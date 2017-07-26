@@ -71,7 +71,9 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
     physics->setTimestep(0.05);
     simulator->add (physics);
     float waterDensity = 1000.0;
-    waterVolume = new WaterVolume(waterDensity, calculateWaterVolumeHeight, calculateWaterVolumeCurrent);
+    waterVolume = new WaterVolume(); // waterDensity); // , calculateWaterVolumeHeight, calculateWaterVolumeCurrent);
+    waterVolume->setDensity(waterDensity);
+    waterVolume->setHeightCallback(calculateWaterVolumeHeight);
     simulator->add (waterVolume);
     
     render = NULL;

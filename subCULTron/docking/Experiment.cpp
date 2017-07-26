@@ -47,7 +47,7 @@
 extern gsl_rng* rng;
 extern long int rngSeed;
 
-float calculateWaterVolumeHeight(btVector3 pos, float time)
+float getWaterVolumeHeight(btVector3 pos, float time)
 {
     float phase =  10.1 / (2.0 * M_PI);
     float amplitude = 0.15;
@@ -56,11 +56,6 @@ float calculateWaterVolumeHeight(btVector3 pos, float time)
     
     return height;
     
-}
-
-btVector3 calculateWaterVolumeCurrent(btVector3 pos, float time)
-{
-    return btVector3(0,0,0);
 }
 
 
@@ -75,7 +70,8 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
     physics->setTimestep(0.05);
     simulator->add (physics);
     float waterDensity = 1000.0;
-    waterVolume = new WaterVolume(waterDensity, calculateWaterVolumeHeight, calculateWaterVolumeCurrent);
+    waterVolume = new WaterVolume();
+    waterVolume->setHeightCallback(getWaterVolumeHeight);
     simulator->add (waterVolume);
     
     render = NULL;
@@ -120,8 +116,6 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
 	aMussels.push_back(r);
 	simulator->add(r);   	
 
-	std::cout << "amussel " << i << " body ptr " << r->body << std::endl;
-	
 	// position is set in reset
     }
 
@@ -136,7 +130,10 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
 	    r->setMeshFilename ("../3dmodels/aPad.3ds.(0.025,0.025,0.025).scale");
 	    r->registerService(render); 
 	}	
-	r->addDevices();	
+	r->addDevices();
+
+//	for (int j = 0; j < 1; j++)
+//	    r->dockers[1]->setDrawable(true);
 	
 	ControllerAPad* c = new ControllerAPad (r);	
 	r->add(c);
@@ -145,7 +142,6 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
 	aPads.push_back(r);
 	simulator->add(r);   	
 	
-	std::cout << "apad " << i << " body ptr " << r->body << std::endl;
 	// position is set in reset
     }
 
@@ -193,19 +189,29 @@ void Experiment::reset ()
 
 	r->body->setLinearVelocity(btVector3(0,0,0));
 	r->body->setAngularVelocity(btVector3(0,0,0));
-	
+
 	// reset position
-	float k = (float)(i) / (float) (aPads.size());
-	float distance = (0.7 + (k * 0.2 - 0.1)) * aquariumRadius;
-	float angle = 2.0 * M_PI * k + M_PI/4;;
-	// float distance = gsl_rng_uniform(rng) * 0.8 * aquariumRadius;
-	// float angle = (gsl_rng_uniform(rng) * 2.0 * M_PI - M_PI);
+	float distance = gsl_rng_uniform(rng) * 0.8 * aquariumRadius;
+	float angle = (gsl_rng_uniform(rng) * 2.0 * M_PI - M_PI);
 	float x = cos(angle) * distance;
 	float y = sin(angle) * distance;
-	float z = 2.0 + r->dimensions[2] / 2.0;		
+	float z = r->dimensions[2] / 2.0 + 2.0;
 	
 	r->setPosition (btVector3(x, y, z));
-	r->setRotation (btQuaternion(btVector3(0, 0, 1), 0));
+	r->setRotation (btQuaternion(btVector3(0, 0, 1), gsl_rng_uniform(rng) * M_PI * 2.0 - M_PI));
+
+	
+	// float k = (float)(i) / (float) (aPads.size());
+	// float distance = (0.7 + (k * 0.2 - 0.1)) * aquariumRadius;
+	// float angle = 2.0 * M_PI * k + M_PI/4;;
+	// // float distance = gsl_rng_uniform(rng) * 0.8 * aquariumRadius;
+	// // float angle = (gsl_rng_uniform(rng) * 2.0 * M_PI - M_PI);
+	// float x = cos(angle) * distance;
+	// float y = sin(angle) * distance;
+	// float z = 2.0 + r->dimensions[2] / 2.0;		
+	
+	// r->setPosition (btVector3(x, y, z));
+	// r->setRotation (btQuaternion(btVector3(0, 0, 1), 0));
 	for (auto* b : r->ballasts)
 	    b->setBuoyancyFactor(1);
     }    

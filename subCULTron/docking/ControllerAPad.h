@@ -34,7 +34,7 @@ public :
     float turnSpeed = 1;
 
     // docking
-    int dockSlot = 0;
+    int dockSlot = 1;
     
     // state handling
     int state;

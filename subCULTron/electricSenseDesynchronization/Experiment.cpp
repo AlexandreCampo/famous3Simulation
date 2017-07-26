@@ -27,11 +27,8 @@
 // Objects
 #include "AquariumCircular.h"
 #include "aFish.h"
-#include "aPad.h"
-#include "aMussel.h"
 
 // Controllers
-#include "ControllerAMussel.h"
 #include "ControllerAFish.h"
 #include "Experiment.h"
 
@@ -129,31 +126,6 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
 //    aFishes[0]->optical->setDrawable(true);
     c->dbg=1;
 
-// add aMussels
-    for (int i = 0; i < aMusselCount; i++)
-    {
-	aMussel* r = new aMussel ();
-	r->registerService(physics);
-	r->registerService(waterVolume);
-	if (render) 
-	{
-	    r->setMeshFilename ("../3dmodels/aMussel_open.obj.(0.01,0.01,0.01).scale");
-	    r->registerService(render); 
-	}
-	r->addDevices();
-	r->setDragCoefficients(btVector3(0.3, 0.3, 1), btVector3(0.5, 0.5, 0.01));
-	r->setDragQuadraticCoefficients(btVector3(0,0,1), btVector3(0,0,0), waterVolume->density);
-
-	ControllerAMussel* c = new ControllerAMussel (r);
-	r->add(c);
-	c->setTimestep(0.1);
-
-	aMussels.push_back(r);
-	simulator->add(r);   	
-	
-	// position is set in reset
-    }
-
     AquariumCircular* aquarium = new AquariumCircular(aquariumRadius,  3.0, 1.0, 40.0);
     aquarium->registerService(physics);
     aquarium->registerService(waterVolume);
@@ -184,24 +156,6 @@ void Experiment::reset ()
 
 	r->setPosition (btVector3(x, y, z));
 	r->setRotation (btQuaternion(btVector3(0, 0, 1), gsl_rng_uniform(rng) * M_PI * 2.0 - M_PI));
-	r->ballast->setBuoyancyFactor(0.0);
-    }
-// reset aMussel
-    for (unsigned int i = 0; i < aMussels.size(); i++)
-    {
-	aMussel* r = aMussels[i];
-
-	// reset aMussel position
-	float distance = gsl_rng_uniform(rng) * 0.8 * aquariumRadius;
-	float angle = (gsl_rng_uniform(rng) * 2.0 * M_PI - M_PI);
-	float x = cos(angle) * distance;
-	float y = sin(angle) * distance;
-	float z = r->dimensions[2] / 2.0 - 0.15;
-	
-	r->setPosition (btVector3(x, y, z));
-	r->setRotation (btQuaternion(btVector3(0, 0, 1), gsl_rng_uniform(rng) * M_PI * 2.0 - M_PI));
-
-	r->setColor (0.8, 0.0, 0.4, 0.0);
 	r->ballast->setBuoyancyFactor(0.0);
     }
 }

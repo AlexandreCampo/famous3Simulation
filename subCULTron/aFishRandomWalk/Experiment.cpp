@@ -70,8 +70,10 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
     physics = new PhysicsBullet();
     physics->setTimestep(0.05);
     simulator->add (physics);
-    float waterDensity = 1000.0;
-    waterVolume = new WaterVolume(waterDensity, calculateWaterVolumeHeight, calculateWaterVolumeCurrent);
+
+    waterVolume = new WaterVolume();
+    waterVolume->setDensity(1000);
+    waterVolume->setHeightCallback(calculateWaterVolumeHeight);
     simulator->add (waterVolume);
     
     render = NULL;
@@ -117,7 +119,7 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
 	// position is set in reset
     }
 
-    AquariumCircular* aquarium = new AquariumCircular(aquariumRadius,  3.0, 1.0, 40.0);
+    AquariumCircular* aquarium = new AquariumCircular(aquariumRadius, 3.0, 40.0);
     aquarium->registerService(physics);
     aquarium->registerService(waterVolume);
     if (render) aquarium->registerService(render);

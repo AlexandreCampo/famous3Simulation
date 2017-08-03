@@ -141,7 +141,11 @@ Experiment::Experiment (Simulator* simulator, bool graphics)
     Eigen::MatrixXf C0(1,1);
     float gamma = 0.06;
     C0(0,0) = gamma * 0.1;
-    staticMeshEsense->setC0(C0);
+    staticMeshEsense->setC0(C0);    
+    Eigen::VectorXf pola(1);
+    pola << 0;
+    staticMeshEsense->setPolarization (pola);
+    staticMeshEsense->setStaticObject(1);
     
     staticMesh->add(staticMeshEsense);
         
